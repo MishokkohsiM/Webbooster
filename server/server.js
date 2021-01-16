@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
 const sendMail = require('./nodemailer');
 
 const app = express();
@@ -14,41 +15,7 @@ const RESPONSE_CODES = {
   CONFLICT: 409,
   NOT_FOUND: 404,
 };
-
-const file = {
-  "product": [
-    {
-      "name": "Парикмахерское кресло «Норм» гидравлическое",
-      "img": "http://dev-wbooster.ru/test_task/img/img-1.png",
-      "price": "9900"
-    },
-    {
-      "name": "Парикмахерское кресло «Норм» гидравлическое",
-      "img": "http://dev-wbooster.ru/test_task/img/img-1.png",
-      "price": "9900"
-    },
-    {
-      "name": "Парикмахерское кресло «Норм» гидравлическое",
-      "img": "http://dev-wbooster.ru/test_task/img/img-1.png",
-      "price": "9900"
-    },
-    {
-      "name": "Парикмахерское кресло «Норм» гидравлическое",
-      "img": "http://dev-wbooster.ru/test_task/img/img-1.png",
-      "price": "9900"
-    },
-    {
-      "name": "Парикмахерское кресло «Норм» гидравлическое",
-      "img": "http://dev-wbooster.ru/test_task/img/img-1.png",
-      "price": "9900"
-    },
-    {
-      "name": "Парикмахерское кресло «Норм» гидравлическое",
-      "img": "http://dev-wbooster.ru/test_task/img/img-1.png",
-      "price": "9900"
-    }
-  ]
-};
+const download = 'https://drive.google.com/u/0/uc?id=1n6I1-lnmKSuS9bn-lgM0U4Y8wUSVdhrJ&export=download';
 
 app.options('/api/*', (req, res, next) => {
   res.status(RESPONSE_CODES.OK);
@@ -80,10 +47,19 @@ app.post('/api/sent-mail/', (req, res) => {
 app.get('/api/', (req, res) => {
   res.set('Access-Control-Allow-Origin', host);
   res.set('Access-Control-Allow-Credentials', 'true');
-  res.status(RESPONSE_CODES.OK);
-  res.json({
-    file,
-  });
+  async function downloadFile () {
+    const result = await fetch(download, {
+      method: 'GET',
+      credential: 'omit',
+      mode: 'cors',
+    });
+    const file = await result.json();
+    res.status(RESPONSE_CODES.OK);
+    res.json({
+      file,
+    })
+  }
+  downloadFile();
 })
 
 app.listen(8000, () => console.log('Server running on localhost:8000'));
